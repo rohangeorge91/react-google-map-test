@@ -12,12 +12,22 @@ import { googleMapUrl } from './constant';
 const uncompressData = (URL) => {
   const options = getObject();
   return sendAPIRequest(URL, options).then((data) => {
-    return data.arrayBuffer();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener('loadend', (e) => {
+        const text = e.srcElement.result;
+        resolve(text);
+      });
+      reader.readAsArrayBuffer(data);
+    });
   }).then((data) => {
-    const unzip = pako.ungzip(data, {to: 'string'});
+    const unzip = pako.ungzip(data, { to: 'string' });
     return unzip;
   }).then((data) => {
     return JSON.parse(data);
+  }).then((data) => {
+    console.log(data);
+    return data;
   }).catch((err) => {
     console.error(err);
     throw err;
@@ -34,16 +44,15 @@ class Map extends Component {
 
   componentDidMount() {
     uncompressData(this.props.resourceUrl).then((data) => {
-      this.setState({ data }); 
+      this.setState({ data });
     });
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.resourceUrl !== prevProps.resourceUrl) {
+    if (this.props.resourceUrl !== prevProps.resourceUrl)
       uncompressData(this.props.resourceUrl).then((data) => {
         this.setState({ data });
       });
-    }
   }
 
   render() {
@@ -52,24 +61,24 @@ class Map extends Component {
         lat: datum[1],
         lng: datum[2]
       };
-    });  
+    });
     return (
       <GoogleMap
         defaultZoom={8}
         defaultCenter={{ lat: 35.3421516418457, lng: 139.201110839844 }} >
         <Polyline options={{
-        path: drawPath,
-        icons: [{
-          icon: ">",
-          offset: '0',
-          repeat: '10px'
-        }],
-        fillColor: 'yellow',
-        fillOpacity: 0.8,
-        scale: 1,
-        strokeColor: 'red',
-        strokeWeight: 3
-      }} />
+          path: drawPath,
+          icons: [{
+            icon: ">",
+            offset: '0',
+            repeat: '10px'
+          }],
+          fillColor: 'yellow',
+          fillOpacity: 0.8,
+          scale: 1,
+          strokeColor: 'red',
+          strokeWeight: 3
+        }} />
       </GoogleMap>
     );
 
