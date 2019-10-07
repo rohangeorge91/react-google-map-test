@@ -38,10 +38,12 @@ class Map extends Component {
     });
   }
 
-  componentDidUpdate() {
-    uncompressData(this.props.resourceUrl).then((data) => {
-      this.setState({ data });
-    });
+  componentDidUpdate(prevProps) {
+    if (this.props.resourceUrl !== prevProps.resourceUrl) {
+      uncompressData(this.props.resourceUrl).then((data) => {
+        this.setState({ data });
+      });
+    }
   }
 
   render() {
@@ -55,7 +57,19 @@ class Map extends Component {
       <GoogleMap
         defaultZoom={8}
         defaultCenter={{ lat: 35.3421516418457, lng: 139.201110839844 }} >
-        <Polyline path={drawPath} options={{ strokeColor: "#FF0000", icons: [{ icon: `FORWARD_CLOSED_ARROW` }] }} />
+        <Polyline options={{
+        path: drawPath,
+        icons: [{
+          icon: ">",
+          offset: '0',
+          repeat: '10px'
+        }],
+        fillColor: 'yellow',
+        fillOpacity: 0.8,
+        scale: 1,
+        strokeColor: 'red',
+        strokeWeight: 3
+      }} />
       </GoogleMap>
     );
 
